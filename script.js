@@ -1,30 +1,43 @@
-const currentDay = document.querySelector("#current-day");
-const timeBlocks = document.querySelectorAll(".time-block");
+    var date = moment().format("MMMM Do YYYY h:mm a");
+    $("#currentDay").text(date);
+    console.log(date);
+  
+    function updateTimeBlocks() {
+      var currentTime = moment().hours();
+  
+      $(".time-block").each(function () {
+        var blockHour = parseInt($(this).attr("id").split("-")[1]);
 
-// Display the current day
-const today = new Date();
-currentDay.textContent = today.toLocaleDateString();
-
-// Color-code the time blocks
-const businessHoursStart = 9;
-const businessHoursEnd = 17;
-for (const timeBlock of timeBlocks) {
-    const time = parseInt(timeBlock.querySelector(".time").textContent.split(":")[0]);
-    if (time < businessHoursStart || time > businessHoursEnd) {
-        timeBlock.classList.add("past");
-    } else if (time === businessHoursStart + today.getHours() - 1) {
-        timeBlock.classList.add("present");
-    } else {
-        timeBlock.classList.add("future");
+        console.log(blockHour, currentTime);
+  
+        if (blockHour === currentTime) {
+          $(this).addClass("present");
+        } else if (blockHour < currentTime) {
+          $(this).addClass("past");
+        } else {
+          $(this).addClass("future");
+        }
+      });
     }
-}
+  
+    updateTimeBlocks();
+  
+    
+    $(".save-btn").on("click", function () {
 
-// Save events in local storage
-for (const timeBlock of timeBlocks) {
-    const saveBtn = timeBlock.querySelector(".save-btn");
-    const textarea = timeBlock.querySelector("textarea");
-    saveBtn.addEventListener("click", () => {
-        localStorage.setItem(timeBlock.querySelector(".time").textContent, textarea.value);
+      var description = $(this).siblings(".description").val().trim();
+      var blockId = $(this).closest(".time-block").attr("id");
+
+      console.log(description, blockId);
+  
+      localStorage.setItem(blockId, description);
     });
-    textarea.value = localStorage.getItem(timeBlock.querySelector(".time").textContent) || "";
-}
+  
+    $(".description").each(function () {
+      var blockId = $(this).closest(".time-block").attr("id");
+      var savedDescription = localStorage.getItem(blockId);
+  
+      if (savedDescription) {
+        $(this).val(savedDescription);
+      }
+    });
